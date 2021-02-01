@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/high_learning_record/high_learning_record.iml" filepath="$PROJECT_DIR$/high_learning_record/high_learning_record.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lijie-Test.iml" filepath="$PROJECT_DIR$/lijie-Test.iml" />
+    </modules>
+  </component>
+</project>
