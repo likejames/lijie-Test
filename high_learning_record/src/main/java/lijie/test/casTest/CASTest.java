@@ -6,8 +6,7 @@ public class CASTest {
     volatile static AtomicInteger count = new AtomicInteger(0);
 
     public static void addOne() {
-        int newValue = count.get()+1;
-        count.compareAndSet(count.get(), newValue);
+        count.incrementAndGet();
     }
     public static void main(String[] args) throws InterruptedException {
         Thread thread = new Thread(new Runnable() {
