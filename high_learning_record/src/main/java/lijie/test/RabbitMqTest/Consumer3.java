@@ -1,8 +1,11 @@
 package lijie.test.RabbitMqTest;
+
 import com.rabbitmq.client.*;
+
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-public class Consumer {
+
+public class Consumer3 {
     public static  int  messageNumber =0;
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -23,6 +26,7 @@ public class Consumer {
         String routingKey = "hola";
         //绑定队列，通过键 hola 将队列和交换器绑定起来
         channel.queueBind(queueName, exchangeName, routingKey);
+
         while(true) {
             //消费消息
             boolean autoAck = false;
@@ -35,16 +39,16 @@ public class Consumer {
                                            byte[] body) throws IOException {
                     String routingKey = envelope.getRoutingKey();
                     String contentType = properties.getContentType();
-//                    System.out.println("Consumer消费的路由键：" + routingKey);
-//                    System.out.println("Consumer消费的内容类型：" + contentType);
+                    System.out.println("Consumer3消费的路由键：" + routingKey);
+                    System.out.println("Consumer3消费的内容类型：" + contentType);
                     long deliveryTag = envelope.getDeliveryTag();
                     //确认消息
                     channel.basicAck(deliveryTag, false);
-//                    System.out.println("Consumer消费的消息体内容：");
+                    System.out.println("Consumer3消费的消息体内容：");
                     String bodyStr = new String(body, "UTF-8");
-                    System.out.println("Consumer消费的数据： "+bodyStr);
+                    System.out.println("Consumer3消费的数据： "+bodyStr);
                     setNumber();
-                    System.out.println("Consumer消费数量: "+messageNumber);
+                    System.out.println("Consumer3消费数量: "+messageNumber);
                 }
             });
         }

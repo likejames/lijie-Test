@@ -23,5 +23,4 @@ public class ThreadPool {
         Future<T> future = executorService.submit(callable);
         return future;
     }
-
 }
