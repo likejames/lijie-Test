@@ -1,6 +1,7 @@
 package lijie.test.utils;
 
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.ConfirmListener;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
@@ -30,11 +31,30 @@ public class ConnectionUtils {
         String queueName = "Testqueue";
         //绑定队列，通过键 hola 将队列和交换器绑定起来
         channel.queueBind(queueName, exchangeName, routingKey);
+        //设置channel确认机制
+        channel.confirmSelect();
+        //添加监听器
+        channel.addConfirmListener(new ConfirmListener() {
+            @Override
+            public void handleAck(long deliveryTag, boolean multiple) throws IOException {
+                System.out.println("Ack: tag no: "+ deliveryTag+ " multiple: "+ multiple);
+            }
+
+            @Override
+            public void handleNack(long deliveryTag, boolean multiple) throws IOException {
+                System.out.println("Nack: tag no: "+ deliveryTag+ " multiple: "+ multiple);
+
+            }
+        });
         return channel;
     }
 
     public static void close(Channel channel,Connection connection) throws IOException, TimeoutException {
-        channel.close();
-        connection.close();
+        if (channel!=null){
+            channel.close();
+        }
+        if (connection!=null){
+            connection.close();
+        }
     }
 }

@@ -1,9 +1,6 @@
 package lijie.test.RabbitMqTest;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ConfirmListener;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 import grizzled.slf4j.Logging;
 import lijie.test.utils.ConnectionUtils;
 import lijie.test.utils.ThreadPool;
@@ -23,19 +20,24 @@ public class Producer1 {
         String exchangeName = "hello-exchange";
         //交换器根据消息携带的路由键，来决定消息交给哪个队列。交换机根据这个绑定规则来交给队列以后，消费者就可以连接
         String routingKey = "hola";
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1; i++) {
             int j = i;
             Connection connection=ConnectionUtils.getConnection();
             Channel channel= ConnectionUtils.getChannel(connection);
             ThreadPool.submit(new Runnable() {
                 @Override
                 public void run() {
-                    for (int  i = 0; i < 10000; i++) {
+                    for (int  i = 0; i < 10; i++) {
                         //发布消息
                         String message = j + " 你好啊: " + i;
                         byte[] messageBodyBytes = message.getBytes();
                         try {
-                            channel.basicPublish(exchangeName, routingKey, null, messageBodyBytes);
+                            channel.basicPublish(exchangeName, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBodyBytes);
+                            //单次提交
+//                            if(channel.waitForConfirms())
+//                            {
+//                                System.out.println("发送成功");
+//                            }
                             System.out.println(j + " ****: " + i);
                             setNumber();
                         } catch (Exception e) {
@@ -43,10 +45,14 @@ public class Producer1 {
                         }
                     }
                     try {
+                        //批量提交
+//                        channel.waitForConfirmsOrDie();
                         ConnectionUtils.close(channel,connection);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (TimeoutException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
                         System.out.println("生产发送的数量是： " + number);
