@@ -1,18 +1,19 @@
 package lijie.test.RabbitMqTest;
 
-import com.rabbitmq.client.*;
-import grizzled.slf4j.Logging;
+import com.alibaba.fastjson.JSONObject;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.MessageProperties;
+import lijie.test.dao.CallInfo;
 import lijie.test.utils.ConnectionUtils;
 import lijie.test.utils.ThreadPool;
-import lombok.SneakyThrows;
-import org.apache.flink.table.expressions.E;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public class Producer1 {
+public class CalloutInfoProducer {
     private static final Logger logger = LoggerFactory.getLogger(Producer1.class);
     private static volatile int number = 0;
 
@@ -20,16 +21,18 @@ public class Producer1 {
         String exchangeName = "hello-exchange";
         //交换器根据消息携带的路由键，来决定消息交给哪个队列。交换机根据这个绑定规则来交给队列以后，消费者就可以连接
         String routingKey = "hola";
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             int j = i;
-            Connection connection=ConnectionUtils.getConnection();
+            Connection connection= ConnectionUtils.getConnection();
             Channel channel= ConnectionUtils.getChannel(connection);
             ThreadPool.submit(new Runnable() {
                 @Override
                 public void run() {
-                    for (int  i = 0; i < 1000; i++) {
+                    long startTime = System.currentTimeMillis();    //获取开始时间
+                    for (int  i = 0; i < 100000; i++) {
                         //发布消息
-                        String message = j + " 你好啊: " + i;
+                        CallInfo callInfo=new CallInfo();
+                        String message = JSONObject.toJSONString(callInfo);
                         byte[] messageBodyBytes = message.getBytes();
                         try {
                             channel.basicPublish(exchangeName, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBodyBytes);
@@ -47,7 +50,6 @@ public class Producer1 {
                     try {
                         //批量提交
 //                        channel.waitForConfirms();
-
                         ConnectionUtils.close(channel,connection);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -58,6 +60,9 @@ public class Producer1 {
                     } finally {
                         System.out.println("生产发送的数量是： " + number);
                     }
+                    long endTime = System.currentTimeMillis();    //获取结束时间
+
+                    System.out.println("程序运行时间：" + (endTime - startTime) + "ms");    //输出程序运行时间
                 }
             });
         }
