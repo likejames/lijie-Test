@@ -16,14 +16,14 @@ import java.util.Properties;
  * @date 2019/1/17 11:55
  */
 public class KafkaConsumerDemo2 extends Thread {
-
+    public static  int  messageNumber =0;
     private final KafkaConsumer<Integer, String> kafkaConsumer;
 
     public KafkaConsumerDemo2(String topic) {
         //构建相关属性
         //@see ConsumerConfig
         Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.211:9092");
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.100:9092");
         //消费组
         /**
          * consumer group是kafka提供的可扩展且具有容错性的消费者机制。既然是
@@ -54,7 +54,7 @@ public class KafkaConsumerDemo2 extends Thread {
          */
 
         //间隔时间
-        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1");
         //反序列化 key
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerDeserializer");
         //反序列化 value
@@ -77,16 +77,20 @@ public class KafkaConsumerDemo2 extends Thread {
     public void run() {
         while (true) {
             //拉取消息
-            ConsumerRecords<Integer, String> consumerRecord = kafkaConsumer.poll(1);
+            ConsumerRecords<Integer, String> consumerRecord = kafkaConsumer.poll(0);
             for (ConsumerRecord<Integer, String> record : consumerRecord) {
                 //record.partition() 获取当前分区
                 System.out.println("kafka2: "+record.partition() + "】】  message receive 【" + record.value() + "】");
 
                 System.out.println("转换的消息类型：　"+JSON.parseObject(record.value(), UserMessage.class).toString());
+                setNumber();
             }
+            System.out.println("生产发送的数量是： " + messageNumber);
         }
     }
-
+    public static void setNumber(){
+        messageNumber=messageNumber+1;
+    }
     public static void main(String[] args) {
         new KafkaConsumerDemo2("test3").start();
     }

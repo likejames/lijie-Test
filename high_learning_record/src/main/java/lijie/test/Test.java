@@ -11,18 +11,13 @@ import java.util.Scanner;
  */
 public class Test {
     public static void main(String[] args) {
-        ArrayList arrayList=new ArrayList();
-        arrayList.add(22);
-        HashMap hashMap=new HashMap();
-        while (true){
-            Scanner scanner=new Scanner(System.in);
-            String siteDomainName=scanner.nextLine();
-            boolean iftrue = siteDomainName.matches("[+]{0,1}(\\d){1,3}[ ]?([-]?((\\d)|[ ]){1,12})+$");
-            if (iftrue == false) {
-                System.out.println("域名不正确");
-            }else {
-                System.out.println("域名正确");
-            }
-        }
+        String s1 = new StringBuilder("go")
+                .append("od").toString();
+        System.out.println(s1.intern() == s1);
+
+
+        String s2 = new StringBuilder("ja")
+                .append("va").toString();
+        System.out.println(s2.intern() == s2);
     }
 }

@@ -10,9 +10,10 @@ public class Consumer1 {
 
     public static void main(String[] args) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setUsername("user");
-        factory.setPassword("password");
-        factory.setHost("114.116.105.151");
+        factory.setUsername("admin");
+        factory.setPassword("123123");
+        //设置 RabbitMQ 地址
+        factory.setHost("192.168.1.72");
         //建立到代理服务器到连接
         Connection conn = factory.newConnection();
         //获得信道

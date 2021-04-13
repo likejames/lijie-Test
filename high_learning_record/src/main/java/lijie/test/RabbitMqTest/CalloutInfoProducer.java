@@ -29,13 +29,16 @@ public class CalloutInfoProducer {
                 @Override
                 public void run() {
                     long startTime = System.currentTimeMillis();    //获取开始时间
-                    for (int  i = 0; i < 100000; i++) {
+                    for (int  i = 0; i < 10000; i++) {
                         //发布消息
                         CallInfo callInfo=new CallInfo();
                         String message = JSONObject.toJSONString(callInfo);
                         byte[] messageBodyBytes = message.getBytes();
                         try {
-                            channel.basicPublish(exchangeName, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBodyBytes);
+                            //消息持久化
+//                            channel.basicPublish(exchangeName, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBodyBytes);
+                            //消息不持久化
+                            channel.basicPublish(exchangeName, routingKey, null, messageBodyBytes);
                             //单次提交
 //                            if(channel.waitForConfirms())
 //                            {
@@ -47,6 +50,8 @@ public class CalloutInfoProducer {
 
                         }
                     }
+                    long endTime = System.currentTimeMillis();    //获取结束时间
+                    System.out.println("程序运行时间：" + (endTime - startTime) + "ms");    //输出程序运行时间
                     try {
                         //批量提交
 //                        channel.waitForConfirms();
@@ -60,9 +65,6 @@ public class CalloutInfoProducer {
                     } finally {
                         System.out.println("生产发送的数量是： " + number);
                     }
-                    long endTime = System.currentTimeMillis();    //获取结束时间
-
-                    System.out.println("程序运行时间：" + (endTime - startTime) + "ms");    //输出程序运行时间
                 }
             });
         }

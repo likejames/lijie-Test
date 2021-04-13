@@ -15,13 +15,13 @@ import java.util.Properties;
  * @date 2019/1/17 11:55
  */
 public class KafkaConsumerDemo extends Thread {
-
+    public static  int  messageNumber =0;
     private final KafkaConsumer<Integer, String> kafkaConsumer;
 
     public KafkaConsumerDemo(String topic) {
         //构建相关属性
         Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.211:9092");
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.100:9092");
         //消费组
         /**
          * consumer group是kafka提供的可扩展且具有容错性的消费者机制。既然是
@@ -46,13 +46,15 @@ public class KafkaConsumerDemo extends Thread {
         //当然，我们也可以通过consumer.commitSync()的方式实现手动提交
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
 
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
         /**max.poll.records
          *此参数设置限制每次调用poll返回的消息数，这样可以更容易的预测每次poll间隔
          要处理的最大值。通过调整此值，可以减少poll间隔
          */
 
         //间隔时间
-        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1");
         //反序列化 key
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerDeserializer");
         //反序列化 value
@@ -62,8 +64,8 @@ public class KafkaConsumerDemo extends Thread {
         //设置 topic
         kafkaConsumer.subscribe(Collections.singletonList(topic));
 
-        //自己设置分区
-//        TopicPartition partition = new TopicPartition(topic, 1);
+//        //自己设置分区
+//        TopicPartition partition = new TopicPartition(topic, 0);
 //        kafkaConsumer.assign(Arrays.asList(partition));
     }
 
@@ -73,18 +75,22 @@ public class KafkaConsumerDemo extends Thread {
      */
     @Override
     public void run() {
-        while (true) {
+      for (int j=0;j<=20;j++){
             //拉取消息
-            ConsumerRecords<Integer, String> consumerRecord = kafkaConsumer.poll(100000000);
+            ConsumerRecords<Integer, String> consumerRecord = kafkaConsumer.poll(0);
             for (ConsumerRecord<Integer, String> record : consumerRecord) {
                 //record.partition() 获取当前分区
                 System.out.println("kafka: "+record.partition() + "】】  message receive 【" + record.value() + "】");
+                setNumber();
             }
+            System.out.println("消费的数量是： " + messageNumber);
         }
     }
-
+    public static void setNumber(){
+        messageNumber=messageNumber+1;
+    }
     public static void main(String[] args) {
-        new KafkaConsumerDemo("test2").start();
+        new KafkaConsumerDemo("test4").start();
     }
 
 }

@@ -1,6 +1,9 @@
 package lijie.test.kafkaPartition;
 
 import com.alibaba.fastjson.JSONObject;
+import lijie.test.RabbitMqTest.Consumer;
+import lijie.test.dao.CallInfo;
+import lijie.test.utils.ThreadPool;
 import org.apache.kafka.clients.producer.*;
 
 import java.util.Properties;
@@ -11,6 +14,7 @@ import java.util.concurrent.ExecutionException;
  * @date 2019/1/17 11:26
  */
 public class KafkaProducerDemo extends Thread {
+    private static volatile int number = 0;
     /**
      * 消息发送者
      */
@@ -29,7 +33,7 @@ public class KafkaProducerDemo extends Thread {
         //@see ProducerConfig
         Properties properties = new Properties();
         //Kafka 地址
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.211:9092");
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.100:9092");
         //kafka 客户端 Demo
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerDemo");
         //The number of acknowledgments the producer requires the leader to have received before considering a request complete. This controls the durability of records that are sent.
@@ -75,17 +79,18 @@ public class KafkaProducerDemo extends Thread {
     }
 
     public static void main(String[] args) {
-        new KafkaProducerDemo("test3", true).start();
+        ThreadPool.submit( new KafkaProducerDemo("test5", true));
     }
 
     @Override
     public void run() {
         int num = 0;
-        while (num < 100) {
-            UserMessage userMessage = new UserMessage();
-            userMessage.setId(num);
+        long startTime = System.currentTimeMillis();    //获取开始时间
+        while (num <1) {
+            CallInfo callInfo=new CallInfo();
+            String message = JSONObject.toJSONString(callInfo);
             if (isAsync) {  //如果是异步发送
-                producer.send(new ProducerRecord<Integer, String>(topic, JSONObject.toJSONString(userMessage)), new Callback() {
+                producer.send(new ProducerRecord<Integer, String>(topic, message), new Callback() {
                     @Override
                     public void onCompletion(RecordMetadata metadata, Exception exception) {
                         if (metadata != null) {
@@ -93,20 +98,23 @@ public class KafkaProducerDemo extends Thread {
                         }
                     }
                 });
+                System.out.println(" ****: " + number);
+                setNumber();
             } else {   //同步发送
                 try {
-                    RecordMetadata metadata = producer.send(new ProducerRecord<Integer, String>(topic, JSONObject.toJSONString(userMessage))).get();
+                    RecordMetadata metadata = producer.send(new ProducerRecord<Integer, String>(topic, message)).get();
                     System.out.println("sync-offset：" + metadata.offset() + "-> partition" + metadata.partition());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             num++;
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
+        long endTime = System.currentTimeMillis();    //获取结束时间
+        System.out.println("######################################################################################程序运行时间：" + (endTime - startTime) + "ms");    //输出程序运行时间
+        System.out.println("######################################################################################生产发送的数量是： " + number);
+    }
+    public static void setNumber() {
+        number = number + 1;
     }
 }

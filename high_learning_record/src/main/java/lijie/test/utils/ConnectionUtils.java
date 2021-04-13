@@ -10,10 +10,10 @@ public class ConnectionUtils {
     public static Connection getConnection() throws IOException, TimeoutException {
         //创建连接工厂
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setUsername("user");
-        factory.setPassword("password");
+        factory.setUsername("admin");
+        factory.setPassword("123123");
         //设置 RabbitMQ 地址
-        factory.setHost("114.116.105.151");
+        factory.setHost("192.168.1.72");
         //建立到代理服务器到连接
         Connection conn = factory.newConnection();
         return conn;

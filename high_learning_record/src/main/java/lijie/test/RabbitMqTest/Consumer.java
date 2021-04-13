@@ -1,15 +1,28 @@
 package lijie.test.RabbitMqTest;
 import com.rabbitmq.client.*;
+import lijie.test.utils.ThreadPool;
+import lombok.SneakyThrows;
+
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-public class Consumer {
+public class Consumer implements Runnable {
     public static  int  messageNumber =0;
 
     public static void main(String[] args) throws IOException, TimeoutException {
+        ThreadPool.submit(new Consumer());
+    }
+    public static void setNumber(){
+        messageNumber=messageNumber+1;
+    }
+
+    @SneakyThrows
+    @Override
+    public void run() {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setUsername("user");
-        factory.setPassword("password");
-        factory.setHost("114.116.105.151");
+        factory.setUsername("admin");
+        factory.setPassword("123123");
+        //设置 RabbitMQ 地址
+        factory.setHost("192.168.1.72");
         //建立到代理服务器到连接
         Connection conn = factory.newConnection();
         //获得信道
@@ -23,7 +36,6 @@ public class Consumer {
         String routingKey = "hola";
         //绑定队列，通过键 hola 将队列和交换器绑定起来
         channel.queueBind(queueName, exchangeName, routingKey);
-        while(true) {
             //消费消息
             boolean autoAck = false;
             String consumerTag = "";
@@ -48,8 +60,4 @@ public class Consumer {
                 }
             });
         }
-    }
-    public static void setNumber(){
-        messageNumber=messageNumber+1;
-    }
 }

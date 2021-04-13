@@ -15,14 +15,14 @@ import java.util.Properties;
  * @date 2019/1/17 11:55
  */
 public class KafkaConsumerDemo1 extends Thread {
-
+    public static  int  messageNumber =0;
     private final KafkaConsumer<Integer, String> kafkaConsumer;
 
     public KafkaConsumerDemo1(String topic) {
         //构建相关属性
         //@see ConsumerConfig
         Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.211:9092");
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.100:9092");
         //消费组
         /**
          * consumer group是kafka提供的可扩展且具有容错性的消费者机制。既然是
@@ -46,6 +46,7 @@ public class KafkaConsumerDemo1 extends Thread {
         //消费者消费消息以后自动提交，只有当消息提交以后，该消息才不会被再次接收到（如果没有 commit，消息可以重复消费，也没有 offset），还可以配合auto.commit.interval.ms控制自动提交的频率。
         //当然，我们也可以通过consumer.commitSync()的方式实现手动提交
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         /**max.poll.records
          *此参数设置限制每次调用poll返回的消息数，这样可以更容易的预测每次poll间隔
@@ -53,7 +54,7 @@ public class KafkaConsumerDemo1 extends Thread {
          */
 
         //间隔时间
-        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1");
         //反序列化 key
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerDeserializer");
         //反序列化 value
@@ -76,16 +77,21 @@ public class KafkaConsumerDemo1 extends Thread {
     public void run() {
         while (true) {
             //拉取消息
-            ConsumerRecords<Integer, String> consumerRecord = kafkaConsumer.poll(100000000);
+            ConsumerRecords<Integer, String> consumerRecord = kafkaConsumer.poll(0);
             for (ConsumerRecord<Integer, String> record : consumerRecord) {
                 //record.partition() 获取当前分区
                 System.out.println("kafka1: "+record.partition() + "】】  message receive 【" + record.value() + "】");
+                setNumber();
             }
+//            System.out.println("消费的数量是： " + messageNumber);
         }
+    }
+    public static void setNumber(){
+        messageNumber=messageNumber+1;
     }
 
     public static void main(String[] args) {
-        new KafkaConsumerDemo1("test2").start();
+        new KafkaConsumerDemo1("test3").start();
     }
 
 }
